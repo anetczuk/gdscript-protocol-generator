@@ -1,6 +1,6 @@
 # GDScript protocol generator
 
-Generate communication protocol in form of GDScript class handling messages.
+Generate abstract communication protocol for GDScript in form of message handling class.
 
 
 ## References

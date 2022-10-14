@@ -1,0 +1,40 @@
+##
+## File was automatically generated using 'gdscript-protocol-generator'
+##
+## Project website: https://github.com/anetczuk/gdscript-protocol-generator
+##
+
+import logging
+import abc
+
+
+_LOGGER = logging.getLogger(__name__)
+
+
+class $TEMPLATE_CLASS_NAME():
+
+    ##### constructor
+    ##def _init():
+    ##    _LOGGER.info( "Protocol handler created" )
+    
+    def handleMessage( self, message ):
+        if typeof( message ) != TYPE_ARRAY:
+            _LOGGER.warning( "invalid message type (array expected): %s message: %s", type( message ), message )
+            return
+        message_len = len( message )
+        if message_len < 1:
+            _LOGGER.warning( "empty message array: %s", message )
+            return
+
+        message_id   = message[0]
+        message_args = message[ 1: ]
+    
+$TEMPLATE_MESSAGE_ID_HANDLE_SWITCH
+        _LOGGER.warning( "unhandled message: ", message )
+
+    ## ============= virtual methods ===============
+
+    @abc.abstractmethod
+    def _send_message( self, message ):
+        raise NotImplementedError('You need to define this method in derived class!')
+$TEMPLATE_MESSAGE_FUNCS

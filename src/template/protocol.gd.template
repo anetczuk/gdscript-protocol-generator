@@ -1,0 +1,34 @@
+##
+## File was automatically generated using 'gdscript-protocol-generator'
+##
+## Project website: https://github.com/anetczuk/gdscript-protocol-generator
+##
+
+
+### constructor
+##func _init():
+##  print( "Protocol handler created" )
+
+func handleMessage( message ):
+    if typeof( message ) != TYPE_ARRAY:
+        print( "invalid message type (array expected): ", typeof( message ), " message: ", message )
+        return
+    const message_len = len( message )
+    if message_len < 1:
+        print( "empty message array: ", message )
+        return
+            
+    var message_id   = message[0]
+    var message_args = message.slice( 1, message_len )
+
+    match message_id:
+$TEMPLATE_MESSAGE_ID_HANDLE_SWITCH
+        ## unknown message
+        _: print( "unhandled message: ", message )
+
+## ============= virtual methods ===============
+
+func _send_message( message ):
+    ## implement in derived class
+    pass
+$TEMPLATE_MESSAGE_FUNCS
