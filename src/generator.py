@@ -61,7 +61,8 @@ def generate_gdscript( configDict, dataMatrix, outputDir ):
     output_name = class_name + ".gd"
 
     template_message_id_handle_switch = ""
-    template_message_funcs = ""
+    template_message_receive_funcs = ""
+    template_message_send_funcs = ""
 
     for index, row in dataMatrix.iterrows():
         message_id = row['message id']
@@ -69,35 +70,42 @@ def generate_gdscript( configDict, dataMatrix, outputDir ):
         
         template_message_id_handle_switch += "        \"%s\": _receive_%s( *message_args )\n" % ( message_id, message_id )
         
-        method_args = ""
-        field_index = -1
-        while True:
-            field_index += 1
-            field_name  = "field " + str( field_index )
-            field_value = get_row_value( row, field_name, None )
-            if field_value is None:
-                break
-            method_args += field_value + " "
+        method_args_list = read_args( row )
 
-        method_args_def = " "
-        if len( method_args ) > 0:
-            method_args_def = ", " + method_args
-
-        template_message_funcs += \
+        method_args_def  = ", ".join( method_args_list )
+        if len(method_args_def) > 0:
+            method_args_def = " " + method_args_def + " "
+        
+        method_args_send = ", ".join( ["\"" + message_id + "\""] + method_args_list )
+        
+        template_message_receive_funcs += \
 """
-func _receive_%(message_id)s(%(method_args)s):
+func _receive_%(message_id)s(%(method_args_def)s):
     ## implement in derived class
     pass
-
-func _send_%(message_id)s(%(method_args)s):
-    var message = [ \"%(message_id)s\"%(method_args_def)s]
-    _send_message( message )
 """ % {
         "message_id": message_id,
-        "method_args": method_args,
         "method_args_def": method_args_def
     }
 
+        template_message_send_funcs += \
+"""
+func _send_%(message_id)s(%(method_args_def)s):
+    var message = [ %(method_args_send)s ]
+    _send_message( message )
+""" % {
+        "message_id": message_id,
+        "method_args_def": method_args_def,
+        "method_args_send": method_args_send
+    }
+
+    template_message_funcs = ""
+    template_message_funcs += template_message_send_funcs
+    template_message_funcs += """
+## ============= virtual methods ===============
+"""
+    template_message_funcs += template_message_receive_funcs 
+    
     contentData = { 'TEMPLATE_MESSAGE_ID_HANDLE_SWITCH': template_message_id_handle_switch,
                     'TEMPLATE_MESSAGE_FUNCS': template_message_funcs }
 
@@ -126,7 +134,8 @@ def generate_python( configDict, dataMatrix, outputDir ):
 
     template_class_name = class_name
     template_message_id_handle_switch = ""
-    template_message_funcs = ""
+    template_message_receive_funcs = ""
+    template_message_send_funcs = ""
 
     for index, row in dataMatrix.iterrows():
         message_id = row['message id']
@@ -138,34 +147,41 @@ def generate_python( configDict, dataMatrix, outputDir ):
             return
 """ % { 'message_id': message_id }
        
-        method_args = ""
-        field_index = -1
-        while True:
-            field_index += 1
-            field_name  = "field " + str( field_index )
-            field_value = get_row_value( row, field_name, None )
-            if field_value is None:
-                break
-            method_args += field_value + " "
+        method_args_list = read_args( row )
 
-        method_args_def = " "
-        if len( method_args ) > 0:
-            method_args_def = ", " + method_args
+        method_args_def  = ", ".join( ["self"] + method_args_list )
+        if len(method_args_def) > 0:
+            method_args_def = " " + method_args_def + " "
+        
+        method_args_send = ", ".join( ["\"" + message_id + "\""] + method_args_list )
 
-        template_message_funcs += \
+        template_message_receive_funcs += \
 """
     @abc.abstractmethod
-    def _receive_%(message_id)s( self%(method_args_def)s):
+    def _receive_%(message_id)s(%(method_args_def)s):
         raise NotImplementedError('You need to define this method in derived class!')
+""" % {
+        "message_id": message_id,
+        "method_args_def": method_args_def
+    }
 
-    def _send_%(message_id)s( self%(method_args_def)s):
-        message = [ \"%(message_id)s\"%(method_args_def)s]
+        template_message_send_funcs += \
+"""
+    def _send_%(message_id)s(%(method_args_def)s):
+        message = [ %(method_args_send)s ]
         _send_message( message )
 """ % {
         "message_id": message_id,
-        "method_args": method_args,
-        "method_args_def": method_args_def
+        "method_args_def": method_args_def,
+        "method_args_send": method_args_send
     }
+
+    template_message_funcs = ""
+    template_message_funcs += template_message_send_funcs
+    template_message_funcs += """
+    ## ============= virtual methods ===============
+"""
+    template_message_funcs += template_message_receive_funcs 
 
     contentData = { 'TEMPLATE_CLASS_NAME': template_class_name,
                     'TEMPLATE_MESSAGE_ID_HANDLE_SWITCH': template_message_id_handle_switch,
@@ -188,11 +204,27 @@ def generate_python( configDict, dataMatrix, outputDir ):
         enumFile.write( script_content )
 
 
+def read_args( row ):
+    method_args_list = []
+    field_index = -1
+    while True:
+        field_index += 1
+        field_name  = "field " + str( field_index )
+        field_value = get_row_value( row, field_name, None )
+        if field_value is None:
+            break
+        method_args_list.append( field_value )
+    return method_args_list
+
+
 def get_row_value( row, key, default_value ):
-    rowVal = row[ key ]
-    if not is_field_empty( rowVal ):
-        return rowVal
-    return default_value
+    try:
+        rowVal = row[ key ]
+        if not is_field_empty( rowVal ):
+            return rowVal
+        return default_value
+    except KeyError:
+        return None
 
 
 def is_field_empty( value ):

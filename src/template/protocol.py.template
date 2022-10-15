@@ -32,7 +32,7 @@ class $TEMPLATE_CLASS_NAME():
 $TEMPLATE_MESSAGE_ID_HANDLE_SWITCH
         _LOGGER.warning( "unhandled message: ", message )
 
-    ## ============= virtual methods ===============
+    ## ============= handling methods ===============
 
     @abc.abstractmethod
     def _send_message( self, message ):

@@ -26,9 +26,8 @@ $TEMPLATE_MESSAGE_ID_HANDLE_SWITCH
         ## unknown message
         _: print( "unhandled message: ", message )
 
-## ============= virtual methods ===============
-
+## ============= handling methods ===============
+$TEMPLATE_MESSAGE_FUNCS
 func _send_message( message ):
     ## implement in derived class
     pass
-$TEMPLATE_MESSAGE_FUNCS
