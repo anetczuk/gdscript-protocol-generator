@@ -68,9 +68,17 @@ def generate_gdscript( configDict, dataMatrix, outputDir ):
         message_id = row['message id']
         _LOGGER.info( "gdscript: handling message %s", message_id )
         
-        template_message_id_handle_switch += "        \"%s\": _receive_%s( *message_args )\n" % ( message_id, message_id )
-        
         method_args_list = read_args( row )
+
+        message_exploded_list = []
+        for i in range( 0, len(method_args_list) ):
+            message_exploded_list.append( "message[%s]" % (i+1) )
+        
+        message_exploded_args = ", ".join( message_exploded_list )
+        if len(message_exploded_args) > 0:
+            message_exploded_args = " " + message_exploded_args + " "
+
+        template_message_id_handle_switch += "        \"%s\": _receive_%s(%s)\n" % ( message_id, message_id, message_exploded_args )
 
         method_args_def  = ", ".join( method_args_list )
         if len(method_args_def) > 0:
@@ -82,7 +90,7 @@ def generate_gdscript( configDict, dataMatrix, outputDir ):
 """
 func _receive_%(message_id)s(%(method_args_def)s):
     ## implement in derived class
-    pass
+    print( "unimplemented method '_receive_%(message_id)s'" )
 """ % {
         "message_id": message_id,
         "method_args_def": method_args_def
