@@ -141,7 +141,7 @@ def generate_python( configDict, dataMatrix, outputDir ):
     output_name = class_name.lower() + ".py"
 
     template_class_name = class_name
-    template_message_id_handle_switch = ""
+    template_message_id_handle_dict = ""
     template_message_receive_funcs = ""
     template_message_send_funcs = ""
 
@@ -149,11 +149,8 @@ def generate_python( configDict, dataMatrix, outputDir ):
         message_id = row['message id']
         _LOGGER.info( "python: handling message %s", message_id )
         
-        template_message_id_handle_switch += \
-        """        if message_id == \"%(message_id)s\":
-            self._receive_%(message_id)s( *message_args )
-            return
-""" % { 'message_id': message_id }
+        template_message_id_handle_dict += \
+            """                \"%(message_id)s\": self._receive_%(message_id)s,\n""" % { 'message_id': message_id }
        
         method_args_list = read_args( row )
 
@@ -189,10 +186,12 @@ def generate_python( configDict, dataMatrix, outputDir ):
     template_message_funcs += """
     ## ============= virtual methods ===============
 """
+
+    template_message_id_handle_dict = "{\n" + template_message_id_handle_dict + "            }\n"
     template_message_funcs += template_message_receive_funcs 
 
     contentData = { 'TEMPLATE_CLASS_NAME': template_class_name,
-                    'TEMPLATE_MESSAGE_ID_HANDLE_SWITCH': template_message_id_handle_switch,
+                    'TEMPLATE_MESSAGE_ID_HANDLE_DICT': template_message_id_handle_dict,
                     'TEMPLATE_MESSAGE_FUNCS': template_message_funcs }
 
     ## ====================================

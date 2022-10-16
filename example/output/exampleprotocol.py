@@ -13,9 +13,15 @@ _LOGGER = logging.getLogger(__name__)
 
 class ExampleProtocol():
 
-    ##### constructor
-    ##def _init():
-    ##    _LOGGER.info( "Protocol handler created" )
+    ### constructor
+    def __init__(self):
+        self.receiver_dict = {
+                "DO_STEP": self._receive_DO_STEP,
+                "ADD_ITEM": self._receive_ADD_ITEM,
+                "REMOVE_ITEM": self._receive_REMOVE_ITEM,
+                "MOVE_ITEM": self._receive_MOVE_ITEM,
+            }
+
 
     def handleMessages( self ):
         while True:
@@ -42,21 +48,13 @@ class ExampleProtocol():
 
         message_id   = message[0]
         message_args = message[ 1: ]
-    
-        if message_id == "DO_STEP":
-            self._receive_DO_STEP( *message_args )
-            return
-        if message_id == "ADD_ITEM":
-            self._receive_ADD_ITEM( *message_args )
-            return
-        if message_id == "REMOVE_ITEM":
-            self._receive_REMOVE_ITEM( *message_args )
-            return
-        if message_id == "MOVE_ITEM":
-            self._receive_MOVE_ITEM( *message_args )
+
+        receiver_func = self.receiver_dict.get( message_id )
+        if receiver_func is None:
+            _LOGGER.warning( "unhandled message: ", message )
             return
 
-        _LOGGER.warning( "unhandled message: ", message )
+        receiver_func( *message_args )
 
     def receive_message( self ):
         response = self._recv_message_raw()

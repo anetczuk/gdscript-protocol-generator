@@ -57,19 +57,19 @@ func receive_message():
 
 func send_DO_STEP():
 	var message = [ "DO_STEP" ]
-	_send_message( message )
+	_send_message_raw( message )
 
 func send_ADD_ITEM( item_id ):
 	var message = [ "ADD_ITEM", item_id ]
-	_send_message( message )
+	_send_message_raw( message )
 
 func send_REMOVE_ITEM( item_id ):
 	var message = [ "REMOVE_ITEM", item_id ]
-	_send_message( message )
+	_send_message_raw( message )
 
 func send_MOVE_ITEM( item_id, position, heading ):
 	var message = [ "MOVE_ITEM", item_id, position, heading ]
-	_send_message( message )
+	_send_message_raw( message )
 
 ## ============= virtual methods ===============
 
