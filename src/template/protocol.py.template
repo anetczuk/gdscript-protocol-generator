@@ -16,9 +16,23 @@ class $TEMPLATE_CLASS_NAME():
     ##### constructor
     ##def _init():
     ##    _LOGGER.info( "Protocol handler created" )
-    
+
+    def handleMessages( self ):
+        while True:
+            data = self._recv_message_raw()
+            error_code = data[0]
+            if error_code != 0:
+                ## return received error code
+                return error_code
+            message = data[1]
+            if message == None:
+                ## no new messages
+                break
+            self.handleMessage( message )
+        return 0
+
     def handleMessage( self, message ):
-        if typeof( message ) != TYPE_ARRAY:
+        if isinstance( message, list ) is False:
             _LOGGER.warning( "invalid message type (array expected): %s message: %s", type( message ), message )
             return
         message_len = len( message )
@@ -32,9 +46,26 @@ class $TEMPLATE_CLASS_NAME():
 $TEMPLATE_MESSAGE_ID_HANDLE_SWITCH
         _LOGGER.warning( "unhandled message: ", message )
 
+    def receive_message( self ):
+        response = self._recv_message_raw()
+        if response[0] != 0:
+            ## return received error code
+            _LOGGER.warning( "unable to receive message, code: %s", response[0] )
+            return None
+        message = response[1]
+        if not isinstance( message, list ):
+            _LOGGER.warning( "invalid message: %s", message )
+            return None
+        return message
+
     ## ============= handling methods ===============
+$TEMPLATE_MESSAGE_FUNCS
+    @abc.abstractmethod
+    def _recv_message_raw( self ):
+        ## implement in derived class
+        raise NotImplementedError('You need to define this method in derived class!')
 
     @abc.abstractmethod
-    def _send_message( self, message ):
+    def _send_message_raw( self, message ):
+        ## implement in derived class
         raise NotImplementedError('You need to define this method in derived class!')
-$TEMPLATE_MESSAGE_FUNCS

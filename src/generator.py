@@ -78,7 +78,7 @@ def generate_gdscript( configDict, dataMatrix, outputDir ):
         if len(message_exploded_args) > 0:
             message_exploded_args = " " + message_exploded_args + " "
 
-        template_message_id_handle_switch += "        \"%s\": _receive_%s(%s)\n" % ( message_id, message_id, message_exploded_args )
+        template_message_id_handle_switch += "\t\t\"%s\": _receive_%s(%s)\n" % ( message_id, message_id, message_exploded_args )
 
         method_args_def  = ", ".join( method_args_list )
         if len(method_args_def) > 0:
@@ -89,8 +89,8 @@ def generate_gdscript( configDict, dataMatrix, outputDir ):
         template_message_receive_funcs += \
 """
 func _receive_%(message_id)s(%(method_args_def)s):
-    ## implement in derived class
-    print( "unimplemented method '_receive_%(message_id)s'" )
+\t## implement in derived class
+\tprint( "unimplemented method '_receive_%(message_id)s'" )
 """ % {
         "message_id": message_id,
         "method_args_def": method_args_def
@@ -99,8 +99,8 @@ func _receive_%(message_id)s(%(method_args_def)s):
         template_message_send_funcs += \
 """
 func _send_%(message_id)s(%(method_args_def)s):
-    var message = [ %(method_args_send)s ]
-    _send_message( message )
+\tvar message = [ %(method_args_send)s ]
+\t_send_message( message )
 """ % {
         "message_id": message_id,
         "method_args_def": method_args_def,
@@ -151,7 +151,7 @@ def generate_python( configDict, dataMatrix, outputDir ):
         
         template_message_id_handle_switch += \
         """        if message_id == \"%(message_id)s\":
-            _receive_%(message_id)s( *message_args )
+            self._receive_%(message_id)s( *message_args )
             return
 """ % { 'message_id': message_id }
        
@@ -175,9 +175,9 @@ def generate_python( configDict, dataMatrix, outputDir ):
 
         template_message_send_funcs += \
 """
-    def _send_%(message_id)s(%(method_args_def)s):
+    def send_%(message_id)s(%(method_args_def)s):
         message = [ %(method_args_send)s ]
-        _send_message( message )
+        self._send_message_raw( message )
 """ % {
         "message_id": message_id,
         "method_args_def": method_args_def,
