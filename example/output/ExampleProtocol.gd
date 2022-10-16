@@ -11,7 +11,7 @@
 
 func handleMessages():
 	while true:
-		var data = _receive_message()
+		var data = _receive_message_raw()
 		var error_code = data[0]
 		if error_code != 0:
 			## return received error code
@@ -41,21 +41,33 @@ func handleMessage( message ):
 		## unknown message
 		_: print( "unhandled message: ", message )
 
+func receive_message():
+	var response = self._recv_message_raw()
+	if response[0] != 0:
+		## return received error code
+		print( "unable to receive message, code: %s", response[0] )
+		return null
+	var message = response[1]
+	if typeof( message ) != TYPE_ARRAY:
+		print( "invalid message type (array expected): ", typeof( message ), " message: ", message )
+		return null
+	return message
+
 ## ============= handling methods ===============
 
-func _send_DO_STEP():
+func send_DO_STEP():
 	var message = [ "DO_STEP" ]
 	_send_message( message )
 
-func _send_ADD_ITEM( item_id ):
+func send_ADD_ITEM( item_id ):
 	var message = [ "ADD_ITEM", item_id ]
 	_send_message( message )
 
-func _send_REMOVE_ITEM( item_id ):
+func send_REMOVE_ITEM( item_id ):
 	var message = [ "REMOVE_ITEM", item_id ]
 	_send_message( message )
 
-func _send_MOVE_ITEM( item_id, position, heading ):
+func send_MOVE_ITEM( item_id, position, heading ):
 	var message = [ "MOVE_ITEM", item_id, position, heading ]
 	_send_message( message )
 
@@ -77,11 +89,11 @@ func _receive_MOVE_ITEM( item_id, position, heading ):
 	## implement in derived class
 	print( "unimplemented method '_receive_MOVE_ITEM'" )
 
-func _receive_message():
+func _receive_message_raw():
 	## implement in derived class
-	print( "unimplemented method '_receive_message'" )
+	print( "unimplemented method '_receive_message_raw'" )
 	return [-1, null]
 
-func _send_message( message ):
+func _send_message_raw( message ):
 	## implement in derived class
-	print( "unimplemented method '_send_message'" )
+	print( "unimplemented method '_send_message_raw'" )

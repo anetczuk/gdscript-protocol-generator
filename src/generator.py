@@ -98,9 +98,9 @@ func _receive_%(message_id)s(%(method_args_def)s):
 
         template_message_send_funcs += \
 """
-func _send_%(message_id)s(%(method_args_def)s):
+func send_%(message_id)s(%(method_args_def)s):
 \tvar message = [ %(method_args_send)s ]
-\t_send_message( message )
+\t_send_message_raw( message )
 """ % {
         "message_id": message_id,
         "method_args_def": method_args_def,
