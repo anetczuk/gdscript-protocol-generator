@@ -37,7 +37,7 @@ $TEMPLATE_MESSAGE_ID_HANDLE_SWITCH
 		## unknown message
 		_: print( "unhandled message: ", message )
 
-func receive_message():
+func receiveMessage():
 	var response = self._recv_message_raw()
 	if response[0] != 0:
 		## return received error code
@@ -50,7 +50,7 @@ func receive_message():
 	return message
 
 ## ============= handling methods ===============
-$TEMPLATE_MESSAGE_FUNCS
+
 func _receive_message_raw():
 	## implement in derived class
 	print( "unimplemented method '_receive_message_raw'" )
@@ -59,3 +59,4 @@ func _receive_message_raw():
 func _send_message_raw( message ):
 	## implement in derived class
 	print( "unimplemented method '_send_message_raw'" )
+$TEMPLATE_MESSAGE_FUNCS

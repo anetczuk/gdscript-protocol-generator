@@ -187,7 +187,7 @@ def generate_python( configDict, dataMatrix, outputDir ):
     ## ============= virtual methods ===============
 """
 
-    template_message_id_handle_dict = "{\n" + template_message_id_handle_dict + "            }\n"
+    template_message_id_handle_dict = "{\n" + template_message_id_handle_dict + "            }"
     template_message_funcs += template_message_receive_funcs 
 
     contentData = { 'TEMPLATE_CLASS_NAME': template_class_name,

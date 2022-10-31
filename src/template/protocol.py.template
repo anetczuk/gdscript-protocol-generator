@@ -50,7 +50,7 @@ class $TEMPLATE_CLASS_NAME():
 
         receiver_func( *message_args )
 
-    def receive_message( self ):
+    def receiveMessage( self ):
         response = self._recv_message_raw()
         if response[0] != 0:
             ## return received error code
@@ -63,7 +63,7 @@ class $TEMPLATE_CLASS_NAME():
         return message
 
     ## ============= handling methods ===============
-$TEMPLATE_MESSAGE_FUNCS
+
     @abc.abstractmethod
     def _recv_message_raw( self ):
         ## implement in derived class
@@ -73,3 +73,4 @@ $TEMPLATE_MESSAGE_FUNCS
     def _send_message_raw( self, message ):
         ## implement in derived class
         raise NotImplementedError('You need to define this method in derived class!')
+$TEMPLATE_MESSAGE_FUNCS
