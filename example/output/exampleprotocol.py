@@ -22,7 +22,6 @@ class ExampleProtocol():
                 "MOVE_ITEM": self._receive_MOVE_ITEM,
             }
 
-
     def handleMessages( self ):
         while True:
             data = self._recv_message_raw()
@@ -56,7 +55,7 @@ class ExampleProtocol():
 
         receiver_func( *message_args )
 
-    def receive_message( self ):
+    def receiveMessage( self ):
         response = self._recv_message_raw()
         if response[0] != 0:
             ## return received error code
@@ -69,6 +68,16 @@ class ExampleProtocol():
         return message
 
     ## ============= handling methods ===============
+
+    @abc.abstractmethod
+    def _recv_message_raw( self ):
+        ## implement in derived class
+        raise NotImplementedError('You need to define this method in derived class!')
+
+    @abc.abstractmethod
+    def _send_message_raw( self, message ):
+        ## implement in derived class
+        raise NotImplementedError('You need to define this method in derived class!')
 
     def send_DO_STEP( self ):
         message = [ "DO_STEP" ]
@@ -102,14 +111,4 @@ class ExampleProtocol():
 
     @abc.abstractmethod
     def _receive_MOVE_ITEM( self, item_id, position, heading ):
-        raise NotImplementedError('You need to define this method in derived class!')
-
-    @abc.abstractmethod
-    def _recv_message_raw( self ):
-        ## implement in derived class
-        raise NotImplementedError('You need to define this method in derived class!')
-
-    @abc.abstractmethod
-    def _send_message_raw( self, message ):
-        ## implement in derived class
         raise NotImplementedError('You need to define this method in derived class!')

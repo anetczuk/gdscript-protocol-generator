@@ -41,7 +41,7 @@ func handleMessage( message ):
 		## unknown message
 		_: print( "unhandled message: ", message )
 
-func receive_message():
+func receiveMessage():
 	var response = self._recv_message_raw()
 	if response[0] != 0:
 		## return received error code
@@ -54,6 +54,15 @@ func receive_message():
 	return message
 
 ## ============= handling methods ===============
+
+func _receive_message_raw():
+	## implement in derived class
+	print( "unimplemented method '_receive_message_raw'" )
+	return [-1, null]
+
+func _send_message_raw( message ):
+	## implement in derived class
+	print( "unimplemented method '_send_message_raw'" )
 
 func send_DO_STEP():
 	var message = [ "DO_STEP" ]
@@ -88,12 +97,3 @@ func _receive_REMOVE_ITEM( item_id ):
 func _receive_MOVE_ITEM( item_id, position, heading ):
 	## implement in derived class
 	print( "unimplemented method '_receive_MOVE_ITEM'" )
-
-func _receive_message_raw():
-	## implement in derived class
-	print( "unimplemented method '_receive_message_raw'" )
-	return [-1, null]
-
-func _send_message_raw( message ):
-	## implement in derived class
-	print( "unimplemented method '_send_message_raw'" )
