@@ -27,8 +27,6 @@ import sys, os
 import logging
 import argparse
 
-from string import Template
-
 import csv
 
 from pandas import DataFrame
@@ -52,45 +50,23 @@ def generate( input_csv_path, output_dir ):
 
     configDict[ 'input_file' ] = input_csv_path
     
-    generate_gdscript( configDict, dataMatrix, output_dir )
-    generate_python( configDict, dataMatrix, output_dir )
-
-
-def generate_gdscript( configDict, dataMatrix, outputDir ):
-    _LOGGER.info( "generating GDScript file" )
-
     class_name  = configDict[ "class_name" ]
-    output_name = class_name + ".gd"
-
-    TEMPLATE_PATH = os.path.join( SCRIPT_DIR, "template", "protocol.gd.tmpl" )
-#     PARAMS_PATH   = os.path.join( SCRIPT_DIR, "template", "protocol.param" )
-    
-    messages_defs = read_messages_defs( dataMatrix )
-    template_params = { "messages": messages_defs }
-    
-    os.makedirs( outputDir, exist_ok=True )
-    output_path = os.path.join( outputDir, output_name )
-    
-    generate_file( TEMPLATE_PATH, template_params, output_path )
-
-
-def generate_python( configDict, dataMatrix, outputDir ):
-    _LOGGER.info( "generating Python file" )
-    
-    class_name  = configDict[ "class_name" ]
-    output_name = class_name.lower() + ".py"       
-        
-    TEMPLATE_PATH = os.path.join( SCRIPT_DIR, "template", "protocol.py.tmpl" )
-#     PARAMS_PATH   = os.path.join( SCRIPT_DIR, "template", "protocol.param" )
-    
     messages_defs = read_messages_defs( dataMatrix )
     template_params = { "class_name": class_name,
                         "messages": messages_defs }
+#     PARAMS_PATH   = os.path.join( SCRIPT_DIR, "template", "protocol.param" )
     
-    os.makedirs( outputDir, exist_ok=True )
-    output_path = os.path.join( outputDir, output_name )
+    os.makedirs( output_dir, exist_ok=True )
     
-    generate_file( TEMPLATE_PATH, template_params, output_path )
+    _LOGGER.info( "generating GDScript file" )
+    template_path = os.path.join( SCRIPT_DIR, "template", "protocol.gd.tmpl" )
+    output_path   = os.path.join( output_dir, class_name + ".gd" )
+    generate_file( template_path, template_params, output_path )
+    
+    _LOGGER.info( "generating Python file" )
+    template_path = os.path.join( SCRIPT_DIR, "template", "protocol.py.tmpl" )
+    output_path   = os.path.join( output_dir, class_name.lower() + ".py" )
+    generate_file( template_path, template_params, output_path )
 
 
 def generate_file( template_path, template_params, output_path ):
