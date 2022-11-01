@@ -1,8 +1,14 @@
-##
-## File was automatically generated using 'gdscript-protocol-generator'
-##
-## Project website: https://github.com/anetczuk/gdscript-protocol-generator
-##
+#* main entry
+
+#load "utils.texhon" as utils
+
+
+#template main( class_name, messages )
+\##
+\## File was automatically generated using 'gdscript-protocol-generator'
+\##
+\## Project website: https://github.com/anetczuk/gdscript-protocol-generator
+\##
 
 import logging
 import abc
@@ -11,11 +17,16 @@ import abc
 _LOGGER = logging.getLogger(__name__)
 
 
-class $TEMPLATE_CLASS_NAME():
+class $class_name():
 
     ### constructor
     def __init__(self):
-        self.receiver_dict = $TEMPLATE_MESSAGE_ID_HANDLE_DICT
+        self.receiver_dict = {
+#{for message_def in messages:
+#!    message_id     = message_def['id']
+                "$message_id": self._receive_$message_id,
+#}
+            }
 
     def handleMessages( self ):
         while True:
@@ -73,4 +84,29 @@ class $TEMPLATE_CLASS_NAME():
     def _send_message_raw( self, message ):
         ## implement in derived class
         raise NotImplementedError('You need to define this method in derived class!')
-$TEMPLATE_MESSAGE_FUNCS
+
+    ## ============= send methods ===============
+
+#{for message_def in messages:
+#!    message_id     = message_def['id']
+#!    message_params = message_def['params']
+#!    params_header  = utils.params_explode( [ "self" ] + message_params )
+#!    params_array   = utils.params_explode( [ '"' + message_id + '"' ] + message_params )
+    def send_$message_id($params_header):
+        message = [$params_array]
+        self._send_message_raw( message )
+
+#}
+    ## ============= receive methods ===============
+
+#{for message_def in messages:
+#!    message_id     = message_def['id']
+#!    message_params = message_def['params']
+#!    params_header  = utils.params_explode( [ "self" ] + message_params )
+    @abc.abstractmethod
+    def _receive_$message_id($params_header):
+        ## implement in derived class
+        raise NotImplementedError('You need to define this method in derived class!')
+
+#}
+#end template

@@ -79,6 +79,8 @@ class ExampleProtocol():
         ## implement in derived class
         raise NotImplementedError('You need to define this method in derived class!')
 
+    ## ============= send methods ===============
+
     def send_DO_STEP( self ):
         message = [ "DO_STEP" ]
         self._send_message_raw( message )
@@ -95,20 +97,25 @@ class ExampleProtocol():
         message = [ "MOVE_ITEM", item_id, position, heading ]
         self._send_message_raw( message )
 
-    ## ============= virtual methods ===============
+    ## ============= receive methods ===============
 
     @abc.abstractmethod
     def _receive_DO_STEP( self ):
+        ## implement in derived class
         raise NotImplementedError('You need to define this method in derived class!')
 
     @abc.abstractmethod
     def _receive_ADD_ITEM( self, item_id ):
+        ## implement in derived class
         raise NotImplementedError('You need to define this method in derived class!')
 
     @abc.abstractmethod
     def _receive_REMOVE_ITEM( self, item_id ):
+        ## implement in derived class
         raise NotImplementedError('You need to define this method in derived class!')
 
     @abc.abstractmethod
     def _receive_MOVE_ITEM( self, item_id, position, heading ):
+        ## implement in derived class
         raise NotImplementedError('You need to define this method in derived class!')
+

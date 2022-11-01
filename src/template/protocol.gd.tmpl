@@ -1,0 +1,100 @@
+#* main entry
+
+#load "utils.texhon" as utils
+
+
+#template main( messages )
+\##
+\## File was automatically generated using 'gdscript-protocol-generator'
+\##
+\## Project website: https://github.com/anetczuk/gdscript-protocol-generator
+\##
+
+
+\### constructor
+\##func _init():
+\##  print( "Protocol handler created" )
+
+func handleMessages():
+	while true:
+		var data = _receive_message_raw()
+		var error_code = data[0]
+		if error_code != 0:
+			## return received error code
+			return error_code
+		var message = data[1]
+		if message == null:
+			## no new messages
+			break
+		handleMessage( message )
+	return 0
+
+func handleMessage( message ):
+	if typeof( message ) != TYPE_ARRAY:
+		print( "invalid message type (array expected): ", typeof( message ), " message: ", message )
+		return
+	var message_len = len( message )
+	if message_len < 1:
+		print( "empty message array: ", message )
+		return
+
+	match message[0]:
+#{for message_def in messages:
+#!    message_id     = message_def['id']
+#!    message_params = message_def['params']
+#!    params_count = len( message_params )
+		"$message_id": _receive_$message_id(${ utils.message_explode( params_count ) })
+#}
+
+		## unknown message
+		_: print( "unhandled message: ", message )
+
+	## end of handler
+
+func receiveMessage():
+	var response = self._recv_message_raw()
+	if response[0] != 0:
+		## return received error code
+		print( "unable to receive message, code: %s", response[0] )
+		return null
+	var message = response[1]
+	if typeof( message ) != TYPE_ARRAY:
+		print( "invalid message type (array expected): ", typeof( message ), " message: ", message )
+		return null
+	return message
+
+\## ============= handling methods ===============
+
+func _receive_message_raw():
+	## implement in derived class
+	print( "unimplemented method '_receive_message_raw'" )
+	return [-1, null]
+
+func _send_message_raw( message ):
+	## implement in derived class
+	print( "unimplemented method '_send_message_raw'" )
+
+\## ============= send methods ===============
+
+#{for message_def in messages:
+#!    message_id     = message_def['id']
+#!    message_params = message_def['params']
+#!    params_header  = utils.params_explode( message_params )
+#!    params_array   = utils.params_explode( [ '"' + message_id + '"' ] + message_params )
+func send_$message_id($params_header):
+	var message = [$params_array]
+	_send_message_raw( message )
+
+#}
+\## ============= receive methods ===============
+
+#{for message_def in messages:
+#!    message_id     = message_def['id']
+#!    message_params = message_def['params']
+#!    params_header  = utils.params_explode( message_params )
+func _receive_$message_id($params_header):
+	## implement in derived class
+	print( "unimplemented method '_receive_$message_id'" )
+
+#}
+#end template

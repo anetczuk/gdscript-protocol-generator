@@ -33,6 +33,8 @@ import csv
 
 from pandas import DataFrame
 
+import texthon
+
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -56,159 +58,82 @@ def generate( input_csv_path, output_dir ):
 
 def generate_gdscript( configDict, dataMatrix, outputDir ):
     _LOGGER.info( "generating GDScript file" )
-    
+
     class_name  = configDict[ "class_name" ]
     output_name = class_name + ".gd"
 
-    template_message_id_handle_switch = ""
-    template_message_receive_funcs = ""
-    template_message_send_funcs = ""
-
-    for index, row in dataMatrix.iterrows():
-        message_id = row['message id']
-        _LOGGER.info( "gdscript: handling message %s", message_id )
-        
-        method_args_list = read_args( row )
-
-        message_exploded_list = []
-        for i in range( 0, len(method_args_list) ):
-            message_exploded_list.append( "message[%s]" % (i+1) )
-        
-        message_exploded_args = ", ".join( message_exploded_list )
-        if len(message_exploded_args) > 0:
-            message_exploded_args = " " + message_exploded_args + " "
-
-        template_message_id_handle_switch += "\t\t\"%s\": _receive_%s(%s)\n" % ( message_id, message_id, message_exploded_args )
-
-        method_args_def  = ", ".join( method_args_list )
-        if len(method_args_def) > 0:
-            method_args_def = " " + method_args_def + " "
-        
-        method_args_send = ", ".join( ["\"" + message_id + "\""] + method_args_list )
-        
-        template_message_receive_funcs += \
-"""
-func _receive_%(message_id)s(%(method_args_def)s):
-\t## implement in derived class
-\tprint( "unimplemented method '_receive_%(message_id)s'" )
-""" % {
-        "message_id": message_id,
-        "method_args_def": method_args_def
-    }
-
-        template_message_send_funcs += \
-"""
-func send_%(message_id)s(%(method_args_def)s):
-\tvar message = [ %(method_args_send)s ]
-\t_send_message_raw( message )
-""" % {
-        "message_id": message_id,
-        "method_args_def": method_args_def,
-        "method_args_send": method_args_send
-    }
-
-    template_message_funcs = ""
-    template_message_funcs += template_message_send_funcs
-    template_message_funcs += """
-## ============= virtual methods ===============
-"""
-    template_message_funcs += template_message_receive_funcs 
+    TEMPLATE_PATH = os.path.join( SCRIPT_DIR, "template", "protocol.gd.tmpl" )
+#     PARAMS_PATH   = os.path.join( SCRIPT_DIR, "template", "protocol.param" )
     
-    contentData = { 'TEMPLATE_MESSAGE_ID_HANDLE_SWITCH': template_message_id_handle_switch,
-                    'TEMPLATE_MESSAGE_FUNCS': template_message_funcs }
-
-    ## ====================================
-
-    templatePath = os.path.join( SCRIPT_DIR, "template", "protocol.gd.template" )
- 
-    with open( templatePath, "r" ) as templateFile:
-        #read it
-        template = Template( templateFile.read() )
-        #do the substitution
-        script_content = template.substitute( contentData )
-
-    ### === writing to file ===
+    messages_defs = read_messages_defs( dataMatrix )
+    template_params = { "messages": messages_defs }
+    
     os.makedirs( outputDir, exist_ok=True )
-    outputFile = os.path.join( outputDir, output_name )
-    with open( outputFile, "w" ) as enumFile:
-        enumFile.write( script_content )
+    output_path = os.path.join( outputDir, output_name )
+    
+    generate_file( TEMPLATE_PATH, template_params, output_path )
 
 
 def generate_python( configDict, dataMatrix, outputDir ):
     _LOGGER.info( "generating Python file" )
     
     class_name  = configDict[ "class_name" ]
-    output_name = class_name.lower() + ".py"
+    output_name = class_name.lower() + ".py"       
+        
+    TEMPLATE_PATH = os.path.join( SCRIPT_DIR, "template", "protocol.py.tmpl" )
+#     PARAMS_PATH   = os.path.join( SCRIPT_DIR, "template", "protocol.param" )
+    
+    messages_defs = read_messages_defs( dataMatrix )
+    template_params = { "class_name": class_name,
+                        "messages": messages_defs }
+    
+    os.makedirs( outputDir, exist_ok=True )
+    output_path = os.path.join( outputDir, output_name )
+    
+    generate_file( TEMPLATE_PATH, template_params, output_path )
 
-    template_class_name = class_name
-    template_message_id_handle_dict = ""
-    template_message_receive_funcs = ""
-    template_message_send_funcs = ""
 
+def generate_file( template_path, template_params, output_path ):
+    engine     = texthon.Engine()
+    module_def = engine.load_file( template_path )              # parse and store the parsed module
+    module_id  = module_def.path                                # store the path so we can find the compiled module later
+
+    engine.make()                                               # compile all modules
+    
+#     with open( PARAMS_PATH, "r" ) as params_file:
+#         params_content = params_file.read()
+#         params = eval( params_content )
+    
+    module = engine.modules[module_id]
+
+    # call the template function named 'main'
+#     script_content = module.main( messages = messages_defs )
+    script_content = module.main( **template_params )
+    
+    ### === writing to file ===
+    with open( output_path, "w" ) as out_file:
+        out_file.write( script_content )
+
+
+# ===================================================================
+
+
+def read_messages_defs( dataMatrix ):
+    messages_defs = []
+    
     for index, row in dataMatrix.iterrows():
         message_id = row['message id']
-        _LOGGER.info( "python: handling message %s", message_id )
+        _LOGGER.info( "gdscript: handling message %s", message_id )
         
-        template_message_id_handle_dict += \
-            """                \"%(message_id)s\": self._receive_%(message_id)s,\n""" % { 'message_id': message_id }
-       
         method_args_list = read_args( row )
 
-        method_args_def  = ", ".join( ["self"] + method_args_list )
-        if len(method_args_def) > 0:
-            method_args_def = " " + method_args_def + " "
+        messages_dict = {}
+        messages_dict[ 'id' ]     = message_id
+        messages_dict[ 'params' ] = method_args_list
         
-        method_args_send = ", ".join( ["\"" + message_id + "\""] + method_args_list )
+        messages_defs.append( messages_dict )
 
-        template_message_receive_funcs += \
-"""
-    @abc.abstractmethod
-    def _receive_%(message_id)s(%(method_args_def)s):
-        raise NotImplementedError('You need to define this method in derived class!')
-""" % {
-        "message_id": message_id,
-        "method_args_def": method_args_def
-    }
-
-        template_message_send_funcs += \
-"""
-    def send_%(message_id)s(%(method_args_def)s):
-        message = [ %(method_args_send)s ]
-        self._send_message_raw( message )
-""" % {
-        "message_id": message_id,
-        "method_args_def": method_args_def,
-        "method_args_send": method_args_send
-    }
-
-    template_message_funcs = ""
-    template_message_funcs += template_message_send_funcs
-    template_message_funcs += """
-    ## ============= virtual methods ===============
-"""
-
-    template_message_id_handle_dict = "{\n" + template_message_id_handle_dict + "            }"
-    template_message_funcs += template_message_receive_funcs 
-
-    contentData = { 'TEMPLATE_CLASS_NAME': template_class_name,
-                    'TEMPLATE_MESSAGE_ID_HANDLE_DICT': template_message_id_handle_dict,
-                    'TEMPLATE_MESSAGE_FUNCS': template_message_funcs }
-
-    ## ====================================
-
-    templatePath = os.path.join( SCRIPT_DIR, "template", "protocol.py.template" )
- 
-    with open( templatePath, "r" ) as templateFile:
-        #read it
-        template = Template( templateFile.read() )
-        #do the substitution
-        script_content = template.substitute( contentData )
-
-    ### === writing to file ===
-    os.makedirs( outputDir, exist_ok=True )
-    outputFile = os.path.join( outputDir, output_name )
-    with open( outputFile, "w" ) as enumFile:
-        enumFile.write( script_content )
+    return messages_defs
 
 
 def read_args( row ):
