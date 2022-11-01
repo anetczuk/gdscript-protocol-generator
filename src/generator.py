@@ -99,7 +99,7 @@ def read_messages_defs( dataMatrix ):
     
     for index, row in dataMatrix.iterrows():
         message_id = row['message id']
-        _LOGGER.info( "gdscript: handling message %s", message_id )
+        _LOGGER.info( "handling message %s", message_id )
         
         method_args_list = read_args( row )
 
