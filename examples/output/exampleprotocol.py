@@ -72,11 +72,13 @@ class ExampleProtocol():
 
     ## ============= handling methods ===============
 
+    ## method is responsible for receiving raw data from communiation channel
     @abc.abstractmethod
     def _recv_message_raw( self ):
         ## implement in derived class
         raise NotImplementedError('You need to define this method in derived class!')
 
+    ## method is responsible for sending raw data through communiation channel
     @abc.abstractmethod
     def _send_message_raw( self, message ):
         ## implement in derived class
@@ -84,39 +86,47 @@ class ExampleProtocol():
 
     ## ============= send methods ===============
 
+    ## sender of 'ADD_ITEM' message
     def send_ADD_ITEM( self, item_id ):
         message = [ "ADD_ITEM", item_id ]
         self._send_message_raw( message )
 
+    ## sender of 'REMOVE_ITEM' message
     def send_REMOVE_ITEM( self, item_id ):
         message = [ "REMOVE_ITEM", item_id ]
         self._send_message_raw( message )
 
+    ## sender of 'MOVE_ITEM' message
     def send_MOVE_ITEM( self, item_id, position, heading ):
         message = [ "MOVE_ITEM", item_id, position, heading ]
         self._send_message_raw( message )
 
+    ## sender of 'PAUSE' message
     def send_PAUSE( self ):
         message = [ "PAUSE" ]
         self._send_message_raw( message )
 
     ## ============= receive methods ===============
 
+    ## callback of reveived 'DO_STEP' message
     @abc.abstractmethod
     def _receive_DO_STEP( self ):
         ## implement in derived class
         raise NotImplementedError('You need to define this method in derived class!')
 
+    ## callback of reveived 'ADD_ITEM' message
     @abc.abstractmethod
     def _receive_ADD_ITEM( self, item_id ):
         ## implement in derived class
         raise NotImplementedError('You need to define this method in derived class!')
 
+    ## callback of reveived 'REMOVE_ITEM' message
     @abc.abstractmethod
     def _receive_REMOVE_ITEM( self, item_id ):
         ## implement in derived class
         raise NotImplementedError('You need to define this method in derived class!')
 
+    ## callback of reveived 'MOVE_ITEM' message
     @abc.abstractmethod
     def _receive_MOVE_ITEM( self, item_id, position, heading ):
         ## implement in derived class

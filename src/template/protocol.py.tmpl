@@ -85,11 +85,13 @@ class $class_name():
 
     ## ============= handling methods ===============
 
+    ## method is responsible for receiving raw data from communiation channel
     @abc.abstractmethod
     def _recv_message_raw( self ):
         ## implement in derived class
         raise NotImplementedError('You need to define this method in derived class!')
 
+    ## method is responsible for sending raw data through communiation channel
     @abc.abstractmethod
     def _send_message_raw( self, message ):
         ## implement in derived class
@@ -103,6 +105,7 @@ class $class_name():
 #!        message_params = message_def['params']
 #!        params_header  = utils.params_explode( [ "self" ] + message_params )
 #!        params_array   = utils.params_explode( [ '"' + message_id + '"' ] + message_params )
+    ## sender of '$message_id' message
     def send_$message_id($params_header):
         message = [$params_array]
         self._send_message_raw( message )
@@ -116,6 +119,7 @@ class $class_name():
 #!        message_id     = message_def['id']
 #!        message_params = message_def['params']
 #!        params_header  = utils.params_explode( [ "self" ] + message_params )
+    ## callback of reveived '$message_id' message
     @abc.abstractmethod
     def _receive_$message_id($params_header):
         ## implement in derived class
