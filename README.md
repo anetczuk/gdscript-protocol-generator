@@ -1,6 +1,21 @@
 # GDScript protocol generator
 
-Generate abstract communication protocol for GDScript in form of message handling class.
+Generate abstract communication protocol between GDScript and Python in form of message handling class.
+
+
+## How it works?
+
+Let's assume that you need a communication channel between Godot application and Python script. Let it be 
+kind of Godot 3D environment (a game) controlled by Python script. In following scenario fundamental thing 
+to do is ability to understand messages (data) reciving and sending by both sides: a Godot application and 
+a Python application.
+
+Generator needs configuration file in form of `.cvs` file where user defines message IDs and message 
+parameters to exchange between parties. Then generator produces GDScript and Python class with `_receive_*` 
+methods to be implemented by user. Implementation of those methods should match meaning of received message. 
+Normally the exchange medium would be TCP/IP channel, but user is not limited to it. Sending and receiving 
+raw data has to be implemented in `_send_message_raw` and `_recv_message_raw` methods. User is 
+encouraged to use inheritance technique to override mentioned stub methods.
 
 
 ## Example
@@ -9,3 +24,12 @@ In directory `examples` there is simple confguration file and output generated b
 
 
 ## References
+
+- [Texthon template processor](texthon.chipsforbrain.org/)
+
+
+## License
+
+Software is distributed under MIT License
+
+Copyright (c) 2022 Arkadiusz Netczuk <dev.arnet@gmail.com>
