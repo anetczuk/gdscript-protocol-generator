@@ -17,6 +17,11 @@ Normally the exchange medium would be TCP/IP channel, but user is not limited to
 raw data has to be implemented in `_send_message_raw` and `_recv_message_raw` methods. User is 
 encouraged to use inheritance technique to override mentioned stub methods.
 
+Generator helps to maintain the protocol consistent based on simple config file.
+
+If You need to serialize and deserialize data between GDScript and Python, then 
+[gdtype-python](https://github.com/anetczuk/gdtype-python) project is the answer.
+
 
 ## Example
 
@@ -26,6 +31,7 @@ In directory `examples` there is simple confguration file and output generated b
 ## References
 
 - [Texthon template processor](texthon.chipsforbrain.org/)
+- [gdtype-python](https://github.com/anetczuk/gdtype-python)
 
 
 ## License
