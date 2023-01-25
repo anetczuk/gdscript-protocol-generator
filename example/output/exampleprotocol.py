@@ -22,6 +22,7 @@ class ExampleProtocol():
                 "MOVE_ITEM": self._receive_MOVE_ITEM,
             }
 
+    ## handling peding messages
     def handleMessages( self ):
         while True:
             data = self._recv_message_raw()
@@ -36,6 +37,7 @@ class ExampleProtocol():
             self.handleMessage( message )
         return 0
 
+    ## handling received message
     def handleMessage( self, message ):
         if isinstance( message, list ) is False:
             _LOGGER.warning( "invalid message type (array expected): %s message: %s", type( message ), message )
@@ -55,6 +57,7 @@ class ExampleProtocol():
 
         receiver_func( *message_args )
 
+    ## receive pending message
     def receiveMessage( self ):
         response = self._recv_message_raw()
         if response[0] != 0:
@@ -81,10 +84,6 @@ class ExampleProtocol():
 
     ## ============= send methods ===============
 
-    def send_DO_STEP( self ):
-        message = [ "DO_STEP" ]
-        self._send_message_raw( message )
-
     def send_ADD_ITEM( self, item_id ):
         message = [ "ADD_ITEM", item_id ]
         self._send_message_raw( message )
@@ -95,6 +94,10 @@ class ExampleProtocol():
 
     def send_MOVE_ITEM( self, item_id, position, heading ):
         message = [ "MOVE_ITEM", item_id, position, heading ]
+        self._send_message_raw( message )
+
+    def send_PAUSE( self ):
+        message = [ "PAUSE" ]
         self._send_message_raw( message )
 
     ## ============= receive methods ===============

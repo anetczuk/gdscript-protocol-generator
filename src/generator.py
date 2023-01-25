@@ -26,6 +26,7 @@
 import sys, os
 import logging
 import argparse
+import copy
 
 import csv
 
@@ -43,6 +44,9 @@ SCRIPT_DIR = os.path.dirname(__file__)      ## full path to script's directory
 # ====================================================================
 
 
+ALLOWED_DIRECTION = [ "BOTH", "TO_PY", "TO_GD", "DISABLED" ]
+
+
 def generate( input_csv_path, output_dir ):
     _LOGGER.info( "parsing file %s", input_csv_path )
 
@@ -53,8 +57,10 @@ def generate( input_csv_path, output_dir ):
     class_name  = configDict[ "class_name" ]
     messages_defs = read_messages_defs( dataMatrix )
     template_params = { "class_name": class_name,
-                        "messages": messages_defs }
+                        "messages_list": messages_defs }
 #     PARAMS_PATH   = os.path.join( SCRIPT_DIR, "template", "protocol.param" )
+    
+    # print( "xxxx:", template_params )
     
     os.makedirs( output_dir, exist_ok=True )
     
@@ -94,18 +100,37 @@ def generate_file( template_path, template_params, output_path ):
 # ===================================================================
 
 
+def filter_message_direction( template_params, allowed_directions ):
+    filtered_params   = copy.deepcopy( template_params )
+    filtered_messages = []
+    for message in filtered_params[ "messages" ]:
+        if message["direction"] in allowed_directions:
+            filtered_messages.append( message )
+    filtered_params[ "messages" ] = filtered_messages
+    return filtered_params
+
+
 def read_messages_defs( dataMatrix ):
     messages_defs = []
     
     for index, row in dataMatrix.iterrows():
         message_id = row['message id']
         _LOGGER.info( "handling message %s", message_id )
-        
+
+        direction: str = row['direction']
+        direction = direction.strip()
+        if not direction:
+            direction = "BOTH"
+        elif direction not in ALLOWED_DIRECTION:
+            _LOGGER.error( "invalid 'direction' parameter: '%s' allowed: %s", direction, ALLOWED_DIRECTION )
+            direction = "BOTH"
+
         method_args_list = read_args( row )
 
         messages_dict = {}
-        messages_dict[ 'id' ]     = message_id
-        messages_dict[ 'params' ] = method_args_list
+        messages_dict[ 'id' ]        = message_id
+        messages_dict[ 'direction' ] = direction
+        messages_dict[ 'params' ]    = method_args_list
         
         messages_defs.append( messages_dict )
 

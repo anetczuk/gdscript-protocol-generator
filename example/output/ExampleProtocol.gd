@@ -9,6 +9,7 @@
 ##func _init():
 ##  print( "Protocol handler created" )
 
+## handling peding messages
 func handleMessages():
 	while true:
 		var data = _receive_message_raw()
@@ -23,6 +24,7 @@ func handleMessages():
 		handleMessage( message )
 	return 0
 
+## handling received message
 func handleMessage( message ):
 	if typeof( message ) != TYPE_ARRAY:
 		print( "invalid message type (array expected): ", typeof( message ), " message: ", message )
@@ -33,18 +35,19 @@ func handleMessage( message ):
 		return
 
 	match message[0]:
-		"DO_STEP": _receive_DO_STEP()
 		"ADD_ITEM": _receive_ADD_ITEM( message[1] )
 		"REMOVE_ITEM": _receive_REMOVE_ITEM( message[1] )
 		"MOVE_ITEM": _receive_MOVE_ITEM( message[1], message[2], message[3] )
+		"PAUSE": _receive_PAUSE()
 
 		## unknown message
 		_: print( "unhandled message: ", message )
 
 	## end of handler
 
+## receive pending message
 func receiveMessage():
-	var response = self._recv_message_raw()
+	var response = _recv_message_raw()
 	if response[0] != 0:
 		## return received error code
 		print( "unable to receive message, code: %s", response[0] )
@@ -86,10 +89,6 @@ func send_MOVE_ITEM( item_id, position, heading ):
 
 ## ============= receive methods ===============
 
-func _receive_DO_STEP():
-	## implement in derived class
-	print( "unimplemented method '_receive_DO_STEP'" )
-
 func _receive_ADD_ITEM( item_id ):
 	## implement in derived class
 	print( "unimplemented method '_receive_ADD_ITEM'" )
@@ -101,4 +100,8 @@ func _receive_REMOVE_ITEM( item_id ):
 func _receive_MOVE_ITEM( item_id, position, heading ):
 	## implement in derived class
 	print( "unimplemented method '_receive_MOVE_ITEM'" )
+
+func _receive_PAUSE():
+	## implement in derived class
+	print( "unimplemented method '_receive_PAUSE'" )
 

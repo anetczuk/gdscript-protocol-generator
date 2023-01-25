@@ -1,9 +1,17 @@
 #* main entry
+#*
+#* Python code line: #!
+#*
 
 #load "utils.texhon" as utils
 
 
-#template main( messages )
+#template main( messages_list )
+#!
+#! SENDER_DIRECTIONS   = [ "BOTH", "TO_PY" ]
+#! RECEIVER_DIRECTIONS = [ "BOTH", "TO_GD" ]
+#!
+#!
 \##
 \## File was automatically generated using 'gdscript-protocol-generator'
 \##
@@ -15,6 +23,7 @@
 \##func _init():
 \##  print( "Protocol handler created" )
 
+\## handling peding messages
 func handleMessages():
 	while true:
 		var data = _receive_message_raw()
@@ -29,6 +38,7 @@ func handleMessages():
 		handleMessage( message )
 	return 0
 
+\## handling received message
 func handleMessage( message ):
 	if typeof( message ) != TYPE_ARRAY:
 		print( "invalid message type (array expected): ", typeof( message ), " message: ", message )
@@ -39,11 +49,13 @@ func handleMessage( message ):
 		return
 
 	match message[0]:
-#{for message_def in messages:
-#!    message_id     = message_def['id']
-#!    message_params = message_def['params']
-#!    params_count = len( message_params )
+#{for message_def in messages_list:
+#{    if message_def['direction'] in RECEIVER_DIRECTIONS:
+#!        message_id     = message_def['id']
+#!        message_params = message_def['params']
+#!        params_count = len( message_params )
 		"$message_id": _receive_$message_id(${ utils.message_explode( params_count ) })
+#}
 #}
 
 		## unknown message
@@ -51,8 +63,9 @@ func handleMessage( message ):
 
 	## end of handler
 
+\## receive pending message
 func receiveMessage():
-	var response = self._recv_message_raw()
+	var response = _recv_message_raw()
 	if response[0] != 0:
 		## return received error code
 		print( "unable to receive message, code: %s", response[0] )
@@ -76,25 +89,29 @@ func _send_message_raw( message ):
 
 \## ============= send methods ===============
 
-#{for message_def in messages:
-#!    message_id     = message_def['id']
-#!    message_params = message_def['params']
-#!    params_header  = utils.params_explode( message_params )
-#!    params_array   = utils.params_explode( [ '"' + message_id + '"' ] + message_params )
+#{for message_def in messages_list:
+#{    if message_def['direction'] in SENDER_DIRECTIONS:
+#!        message_id     = message_def['id']
+#!        message_params = message_def['params']
+#!        params_header  = utils.params_explode( message_params )
+#!        params_array   = utils.params_explode( [ '"' + message_id + '"' ] + message_params )
 func send_$message_id($params_header):
 	var message = [$params_array]
 	_send_message_raw( message )
 
 #}
+#}
 \## ============= receive methods ===============
 
-#{for message_def in messages:
-#!    message_id     = message_def['id']
-#!    message_params = message_def['params']
-#!    params_header  = utils.params_explode( message_params )
+#{for message_def in messages_list:
+#{    if message_def['direction'] in RECEIVER_DIRECTIONS:
+#!        message_id     = message_def['id']
+#!        message_params = message_def['params']
+#!        params_header  = utils.params_explode( message_params )
 func _receive_$message_id($params_header):
 	## implement in derived class
 	print( "unimplemented method '_receive_$message_id'" )
 
+#}
 #}
 #end template
