@@ -30,10 +30,10 @@ class $class_name():
 #{for message_def in messages_list:
 #{    if message_def['direction'] in RECEIVER_DIRECTIONS:
 #!        message_id     = message_def['id']
-                "$message_id": self._receive_$message_id,
+                                "$message_id": self._receive_$message_id,
 #}
 #}
-            }
+                            }
 
     ## handling peding messages
     def handleMessages( self ):
@@ -44,7 +44,7 @@ class $class_name():
                 ## return received error code
                 return error_code
             message = data[1]
-            if message == None:
+            if message is None:
                 ## no new messages
                 break
             self.handleMessage( message )
@@ -119,7 +119,7 @@ class $class_name():
 #!        message_id     = message_def['id']
 #!        message_params = message_def['params']
 #!        params_header  = utils.params_explode( [ "self" ] + message_params )
-    ## callback of reveived '$message_id' message
+    ## callback of received '$message_id' message
     @abc.abstractmethod
     def _receive_$message_id($params_header):
         ## implement in derived class
