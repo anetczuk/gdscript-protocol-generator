@@ -15,6 +15,8 @@
 \## Project website: https://github.com/anetczuk/gdscript-protocol-generator
 \##
 
+# pylint: disable=C0103
+
 import logging
 import abc
 
@@ -65,7 +67,7 @@ class $class_name():
 
         receiver_func = self.receiver_dict.get( message_id )
         if receiver_func is None:
-            _LOGGER.warning( "unhandled message: ", message )
+            _LOGGER.warning( "unhandled message: %s", message )
             return
 
         receiver_func( *message_args )
@@ -124,7 +126,6 @@ class $class_name():
     def _receive_$message_id($params_header):
         ## implement in derived class
         raise NotImplementedError('You need to define this method in derived class!')
-
 #}
 #}
 #end template
